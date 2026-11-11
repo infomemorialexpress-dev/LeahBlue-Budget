@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
   createBill,
@@ -38,6 +38,7 @@ const INITIAL_FORM = {
 
 function Bills() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
 
   const [bills, setBills] = useState([]);
@@ -61,21 +62,33 @@ function Bills() {
     [logout, navigate],
   );
 
-  const loadBills = useCallback(async () => {
-    setError('');
-    try {
-      const data = await getBills();
-      setBills(Array.isArray(data) ? data : []);
-    } catch (err) {
-      handleAuthOrError(err, 'Unable to load your bills.');
-    } finally {
-      setLoading(false);
-    }
-  }, [handleAuthOrError]);
+  const loadBills = useCallback(
+    async (isCancelled) => {
+      const checkCancelled = typeof isCancelled === 'function' ? isCancelled : () => false;
+      setError('');
+      try {
+        const data = await getBills();
+        if (checkCancelled()) return;
+        setBills(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (checkCancelled()) return;
+        handleAuthOrError(err, 'Unable to load your bills.');
+      } finally {
+        if (!checkCancelled()) {
+          setLoading(false);
+        }
+      }
+    },
+    [handleAuthOrError],
+  );
 
   useEffect(() => {
-    loadBills();
-  }, [loadBills]);
+    let cancelled = false;
+    loadBills(() => cancelled);
+    return () => {
+      cancelled = true;
+    };
+  }, [loadBills, location.key, location.pathname]);
 
   const sortedBills = useMemo(
     () =>

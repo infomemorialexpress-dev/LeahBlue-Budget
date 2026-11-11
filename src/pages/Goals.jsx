@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { createGoal, deleteGoal, getGoals, updateGoal } from '../services/api.js';
 import { formatCurrency, formatUtcDate } from '../utils/formatters.js';
 
 function Goals() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
 
   const [goals, setGoals] = useState([]);
@@ -34,21 +35,33 @@ function Goals() {
     [logout, navigate],
   );
 
-  const loadGoals = useCallback(async () => {
-    setError('');
-    try {
-      const data = await getGoals();
-      setGoals(Array.isArray(data) ? data : []);
-    } catch (err) {
-      handleAuthOrError(err, 'Unable to load your savings goals.');
-    } finally {
-      setLoading(false);
-    }
-  }, [handleAuthOrError]);
+  const loadGoals = useCallback(
+    async (isCancelled) => {
+      const checkCancelled = typeof isCancelled === 'function' ? isCancelled : () => false;
+      setError('');
+      try {
+        const data = await getGoals();
+        if (checkCancelled()) return;
+        setGoals(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (checkCancelled()) return;
+        handleAuthOrError(err, 'Unable to load your savings goals.');
+      } finally {
+        if (!checkCancelled()) {
+          setLoading(false);
+        }
+      }
+    },
+    [handleAuthOrError],
+  );
 
   useEffect(() => {
-    loadGoals();
-  }, [loadGoals]);
+    let cancelled = false;
+    loadGoals(() => cancelled);
+    return () => {
+      cancelled = true;
+    };
+  }, [loadGoals, location.key, location.pathname]);
 
   const handleCreateGoal = async (event) => {
     event.preventDefault();

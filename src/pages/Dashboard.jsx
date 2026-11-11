@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddExpense from '../components/AddExpense.jsx';
 import WeeklyCheckInModal from '../components/WeeklyCheckInModal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -22,17 +22,19 @@ function formatMonthHeading(monthLabel) {
 
 function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
 
   const [summary, setSummary] = useState({
     month: '',
     currentMonthIncome: 0,
     currentMonthExpenses: 0,
+    upcomingBillsTotal: 0,
+    totalSavingsContributions: 0,
     remainingBudget: 0,
     expensesByCategory: [],
     nextPayDate: null,
     upcomingBills: [],
-    upcomingBillsTotal: 0,
   });
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,44 +42,58 @@ function Dashboard() {
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchDashboardData = useCallback(async () => {
-    setError('');
-    try {
-      const [summaryData, expenseList] = await Promise.all([
-        getDashboardSummary(),
-        getExpenses(),
-      ]);
+  const fetchDashboardData = useCallback(
+    async (isCancelled) => {
+      const checkCancelled = typeof isCancelled === 'function' ? isCancelled : () => false;
+      setError('');
+      try {
+        const [summaryData, expenseList] = await Promise.all([
+          getDashboardSummary(),
+          getExpenses(),
+        ]);
 
-      setSummary({
-        month: summaryData.month || '',
-        currentMonthIncome: Number(summaryData.currentMonthIncome || 0),
-        currentMonthExpenses: Number(summaryData.currentMonthExpenses || 0),
-        remainingBudget: Number(summaryData.remainingBudget || 0),
-        expensesByCategory: Array.isArray(summaryData.expensesByCategory)
-          ? summaryData.expensesByCategory
-          : [],
-        nextPayDate: summaryData.nextPayDate || null,
-        upcomingBills: Array.isArray(summaryData.upcomingBills)
-          ? summaryData.upcomingBills
-          : [],
-        upcomingBillsTotal: Number(summaryData.upcomingBillsTotal || 0),
-      });
-      setExpenses(Array.isArray(expenseList) ? expenseList : []);
-    } catch (err) {
-      if (err.status === 401) {
-        logout();
-        navigate('/', { replace: true });
-        return;
+        if (checkCancelled()) return;
+
+        setSummary({
+          month: summaryData.month || '',
+          currentMonthIncome: Number(summaryData.currentMonthIncome || 0),
+          currentMonthExpenses: Number(summaryData.currentMonthExpenses || 0),
+          upcomingBillsTotal: Number(summaryData.upcomingBillsTotal || 0),
+          totalSavingsContributions: Number(summaryData.totalSavingsContributions || 0),
+          remainingBudget: Number(summaryData.remainingBudget || 0),
+          expensesByCategory: Array.isArray(summaryData.expensesByCategory)
+            ? summaryData.expensesByCategory
+            : [],
+          nextPayDate: summaryData.nextPayDate || null,
+          upcomingBills: Array.isArray(summaryData.upcomingBills)
+            ? summaryData.upcomingBills
+            : [],
+        });
+        setExpenses(Array.isArray(expenseList) ? expenseList : []);
+      } catch (err) {
+        if (checkCancelled()) return;
+        if (err.status === 401) {
+          logout();
+          navigate('/', { replace: true });
+          return;
+        }
+        setError(err.message || 'Unable to load your budget summary.');
+      } finally {
+        if (!checkCancelled()) {
+          setLoading(false);
+        }
       }
-      setError(err.message || 'Unable to load your budget summary.');
-    } finally {
-      setLoading(false);
-    }
-  }, [logout, navigate]);
+    },
+    [logout, navigate],
+  );
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    let cancelled = false;
+    fetchDashboardData(() => cancelled);
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchDashboardData, location.key, location.pathname]);
 
   const handleDeleteExpense = async (expenseId) => {
     setError('');
@@ -100,9 +116,8 @@ function Dashboard() {
   const remainingClass =
     summary.remainingBudget >= 0 ? 'metric-value is-positive' : 'metric-value is-negative';
 
-  const remainingAfterBills = summary.remainingBudget - summary.upcomingBillsTotal;
-  const remainingAfterBillsClass =
-    remainingAfterBills >= 0 ? 'mini-stat-value is-positive' : 'mini-stat-value is-negative';
+  const remainingMiniClass =
+    summary.remainingBudget >= 0 ? 'mini-stat-value is-positive' : 'mini-stat-value is-negative';
 
   const maxCategoryTotal = summary.expensesByCategory.reduce(
     (max, item) => Math.max(max, Number(item.total || 0)),
@@ -161,7 +176,7 @@ function Dashboard() {
           </strong>
           <span className="metric-hint">
             {summary.remainingBudget >= 0
-              ? 'Safe to allocate or save'
+              ? 'After expenses, upcoming bills & savings'
               : 'Over monthly paycheck plan'}
           </span>
         </article>
@@ -194,9 +209,16 @@ function Dashboard() {
           </div>
 
           <div className="mini-stat-box">
-            <span className="mini-stat-label">Remaining budget after upcoming bills</span>
-            <strong className={loading ? 'mini-stat-value' : remainingAfterBillsClass}>
-              {loading ? '—' : formatCurrency(remainingAfterBills)}
+            <span className="mini-stat-label">Savings goals allocated</span>
+            <strong className="mini-stat-value">
+              {loading ? '—' : formatCurrency(summary.totalSavingsContributions)}
+            </strong>
+          </div>
+
+          <div className="mini-stat-box">
+            <span className="mini-stat-label">Remaining budget after bills &amp; savings</span>
+            <strong className={loading ? 'mini-stat-value' : remainingMiniClass}>
+              {loading ? '—' : formatCurrency(summary.remainingBudget)}
             </strong>
           </div>
         </div>

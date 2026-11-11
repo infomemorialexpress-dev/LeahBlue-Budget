@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
   createIncome,
@@ -41,6 +41,7 @@ const INITIAL_INCOME_FORM = {
 
 function Budget() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const userKey = user?.id || user?.email || 'default';
 
@@ -70,25 +71,34 @@ function Budget() {
     [logout, navigate],
   );
 
-  const loadIncomes = useCallback(async () => {
-    setError('');
-    try {
-      const data = await getIncome();
-      setIncomes(Array.isArray(data) ? data : []);
-    } catch (err) {
-      handleAuthOrError(err, 'Unable to load your income sources.');
-    } finally {
-      setLoading(false);
-    }
-  }, [handleAuthOrError]);
+  const loadIncomes = useCallback(
+    async (isCancelled) => {
+      const checkCancelled = typeof isCancelled === 'function' ? isCancelled : () => false;
+      setError('');
+      try {
+        const data = await getIncome();
+        if (checkCancelled()) return;
+        setIncomes(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (checkCancelled()) return;
+        handleAuthOrError(err, 'Unable to load your income sources.');
+      } finally {
+        if (!checkCancelled()) {
+          setLoading(false);
+        }
+      }
+    },
+    [handleAuthOrError],
+  );
 
   useEffect(() => {
-    loadIncomes();
-  }, [loadIncomes]);
-
-  useEffect(() => {
+    let cancelled = false;
+    loadIncomes(() => cancelled);
     setCategoryBudgets(getCategoryBudgets(userKey));
-  }, [userKey]);
+    return () => {
+      cancelled = true;
+    };
+  }, [loadIncomes, userKey, location.key, location.pathname]);
 
   const resetIncomeForm = () => {
     setIncomeForm({
