@@ -1,5 +1,13 @@
-const rawBaseUrl = import.meta.env.VITE_API_URL?.trim();
-export const API_BASE_URL = (rawBaseUrl || '/api').replace(/\/+$/, '');
+function resolveApiBaseUrl(rawValue) {
+  const cleaned = (rawValue || '').trim().replace(/\/+$/, '');
+  if (!cleaned) return '/api';
+  if (/^https?:\/\//i.test(cleaned) && !cleaned.endsWith('/api')) {
+    return `${cleaned}/api`;
+  }
+  return cleaned;
+}
+
+export const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_API_URL);
 
 export const TOKEN_STORAGE_KEY = 'leahblue_token';
 export const USER_STORAGE_KEY = 'leahblue_user';
