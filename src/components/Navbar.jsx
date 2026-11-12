@@ -28,33 +28,31 @@ function Navbar() {
           </span>
         </Link>
 
-        <nav className="navbar-links" aria-label="Main navigation">
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        {isAuthenticated && (
+          <>
+            <nav className="navbar-links" aria-label="Main navigation">
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
 
-        <div className="navbar-actions">
-          {isAuthenticated ? (
-            <button
-              type="button"
-              className="btn-secondary nav-action-btn"
-              onClick={handleLogout}
-            >
-              Sign Out
-            </button>
-          ) : (
-            <Link className="btn-secondary nav-action-btn" to="/">
-              Log In
-            </Link>
-          )}
-        </div>
+            <div className="navbar-actions">
+              <button
+                type="button"
+                className="btn-secondary nav-action-btn"
+                onClick={handleLogout}
+              >
+                Sign Out
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </header>
   );
