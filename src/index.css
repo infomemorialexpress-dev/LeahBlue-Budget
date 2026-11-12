@@ -332,6 +332,19 @@ a:hover {
   color: var(--text-secondary);
 }
 
+.auth-inline-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--accent-blue-hover);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.auth-inline-link:hover {
+  text-decoration: underline;
+  color: var(--accent-blue);
+}
+
 .badge-success {
   display: inline-flex;
   align-items: center;

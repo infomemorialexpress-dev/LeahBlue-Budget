@@ -69,6 +69,20 @@ export function register(payload) {
   });
 }
 
+export function forgotPassword(email) {
+  return apiRequest('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token, password) {
+  return apiRequest(`/auth/reset-password/${encodeURIComponent(token)}`, {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+}
+
 export function createIncome(payload) {
   return apiRequest('/incomes', {
     method: 'POST',

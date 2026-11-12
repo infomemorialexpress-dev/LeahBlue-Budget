@@ -71,6 +71,11 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <div style={{ textAlign: 'right', marginTop: '0.25rem' }}>
+              <Link to="/forgot-password" className="auth-inline-link">
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           <button className="btn-primary" type="submit" disabled={isSubmitting}>
