@@ -104,11 +104,14 @@ function Budget() {
       setError('');
       try {
         const data = await getIncome();
-        if (checkCancelled()) return;
-        setIncomes(Array.isArray(data) ? data : []);
+        if (checkCancelled()) return [];
+        const incomeList = Array.isArray(data) ? data : [];
+        setIncomes(incomeList);
+        return incomeList;
       } catch (err) {
-        if (checkCancelled()) return;
+        if (checkCancelled()) return [];
         handleAuthOrError(err, 'Unable to load your income sources.');
+        return [];
       } finally {
         if (!checkCancelled()) {
           setLoading(false);
@@ -120,26 +123,52 @@ function Budget() {
 
   useEffect(() => {
     let cancelled = false;
-    loadIncomes(() => cancelled);
-    setCategoryBudgets(getCategoryBudgets(userKey));
+
+    async function init() {
+      const loadedIncomes = await loadIncomes(() => cancelled);
+      setCategoryBudgets(getCategoryBudgets(userKey));
+
+      if (cancelled) return;
+
+      const isEditAction =
+        location.state?.action === 'edit-income' ||
+        location.hash === '#edit-income' ||
+        location.hash === '#income';
+
+      if (isEditAction) {
+        const list = Array.isArray(loadedIncomes) ? loadedIncomes : [];
+        if (list.length > 0) {
+          const firstIncome = list[0];
+          setEditingIncomeId(firstIncome._id);
+          setIncomeForm({
+            sourceName: firstIncome.sourceName || '',
+            amount: String(firstIncome.amount ?? ''),
+            paySchedule: firstIncome.paySchedule || 'biweekly',
+            nextPayDate: firstIncome.nextPayDate
+              ? String(firstIncome.nextPayDate).slice(0, 10)
+              : getTodayDateString(),
+          });
+        }
+
+        setTimeout(() => {
+          const el = document.getElementById('income-sources-section');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const amountInput = document.getElementById('income-amount');
+            if (amountInput) {
+              amountInput.focus();
+              amountInput.select?.();
+            }
+          }
+        }, 120);
+      }
+    }
+
+    init();
     return () => {
       cancelled = true;
     };
-  }, [loadIncomes, userKey, location.key, location.pathname]);
-
-  useEffect(() => {
-    if (location.hash === '#income' || location.hash === '#income-sources-section') {
-      const timer = setTimeout(() => {
-        const el = document.getElementById('income-sources-section');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          const firstInput = el.querySelector('input');
-          if (firstInput) firstInput.focus();
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [location.hash, location.key]);
+  }, [loadIncomes, userKey, location.key, location.pathname, location.state, location.hash]);
 
   const resetIncomeForm = () => {
     setIncomeForm({

@@ -159,7 +159,8 @@ function Dashboard() {
           <div className="metric-card-header">
             <span className="metric-label">Income this month</span>
             <Link
-              to="/budget#income"
+              to="/budget"
+              state={{ action: 'edit-income' }}
               className="btn-card-action"
               title="Edit paycheck amount, name, frequency, and next date in Budget Planner"
             >
