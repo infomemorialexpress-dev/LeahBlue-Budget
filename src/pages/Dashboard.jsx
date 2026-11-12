@@ -156,7 +156,16 @@ function Dashboard() {
 
       <div className="summary-grid" aria-label="Monthly budget summary">
         <article className="metric-card">
-          <span className="metric-label">Income this month</span>
+          <div className="metric-card-header">
+            <span className="metric-label">Income this month</span>
+            <Link
+              to="/budget#income"
+              className="btn-card-action"
+              title="Edit paycheck amount, name, frequency, and next date in Budget Planner"
+            >
+              ✎ Edit Income
+            </Link>
+          </div>
           <strong className="metric-value">
             {loading ? '—' : formatCurrency(summary.currentMonthIncome)}
           </strong>

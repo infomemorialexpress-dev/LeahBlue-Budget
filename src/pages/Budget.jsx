@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import HowItWorks from '../components/HowItWorks.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
   createIncome,
@@ -125,6 +126,20 @@ function Budget() {
       cancelled = true;
     };
   }, [loadIncomes, userKey, location.key, location.pathname]);
+
+  useEffect(() => {
+    if (location.hash === '#income' || location.hash === '#income-sources-section') {
+      const timer = setTimeout(() => {
+        const el = document.getElementById('income-sources-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const firstInput = el.querySelector('input');
+          if (firstInput) firstInput.focus();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash, location.key]);
 
   const resetIncomeForm = () => {
     setIncomeForm({
@@ -334,7 +349,11 @@ function Budget() {
       </div>
 
       <div className="dashboard-content-grid">
-        <section className="panel-card" aria-labelledby="income-sources-heading">
+        <section
+          className="panel-card"
+          id="income-sources-section"
+          aria-labelledby="income-sources-heading"
+        >
           <header className="panel-header">
             <h2 id="income-sources-heading" className="panel-title">
               Income Sources
@@ -343,6 +362,8 @@ function Budget() {
               Add, edit, or remove paychecks and side income streams.
             </p>
           </header>
+
+          <HowItWorks defaultOpen={false} />
 
           <form className="form-stack" onSubmit={handleIncomeSubmit}>
             <div className="field-group">

@@ -392,6 +392,36 @@ a:hover {
   gap: 0.5rem;
 }
 
+.metric-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.btn-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--accent-blue-hover);
+  background-color: var(--accent-blue-soft);
+  border: 1px solid transparent;
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-card-action:hover {
+  text-decoration: none;
+  background-color: #dbeaf2;
+  border-color: var(--accent-blue);
+  color: var(--accent-blue-hover);
+}
+
 .metric-card.is-highlight {
   background-color: var(--surface-beige);
 }
@@ -1161,4 +1191,120 @@ a:hover {
 
 .summary-box strong {
   color: var(--text-primary);
+}
+
+/* How It Works collapsible component */
+.how-it-works-card {
+  background-color: var(--surface-beige);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s ease;
+}
+
+.how-it-works-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.how-it-works-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.how-it-works-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.how-it-works-toggle-btn {
+  background-color: var(--bg-ivory);
+  border: 1px solid var(--border-warm);
+  color: var(--accent-blue-hover);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.how-it-works-toggle-btn:hover {
+  background-color: #ffffff;
+  border-color: var(--accent-blue);
+}
+
+.how-it-works-body {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-warm);
+}
+
+.how-it-works-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+
+.how-it-works-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.how-it-works-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  background-color: var(--bg-ivory);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.how-it-works-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-blue-hover);
+  background-color: var(--accent-blue-soft);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.how-it-works-step-content {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.how-it-works-step-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.how-it-works-step-desc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import HowItWorks from '../components/HowItWorks.jsx';
 import { createExpense, createIncome } from '../services/api.js';
 
 const PAY_SCHEDULE_OPTIONS = [
@@ -115,6 +116,7 @@ function Onboarding() {
   return (
     <section className="auth-container">
       <div className="card onboarding-card">
+        <HowItWorks defaultOpen={true} />
         <header className="card-header">
           <span className="brand-eyebrow">Paycheck Setup</span>
           <h1 className="card-title">Set up your pay cycle</h1>
