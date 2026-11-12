@@ -34,8 +34,9 @@ function Register() {
     <section className="auth-container">
       <div className="card">
         <header className="card-header">
-          <span className="brand-eyebrow">LeahBlue Budget</span>
+          <span className="brand-eyebrow">MoneyFlow 360</span>
           <h1 className="card-title">Create your account</h1>
+          <p className="card-headline">Every paycheck. Every bill. One clear picture.</p>
           <p className="card-subtitle">
             Enter your Stan Store Access Key to unlock your budget planner.
           </p>

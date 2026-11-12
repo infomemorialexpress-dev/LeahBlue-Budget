@@ -30,9 +30,10 @@ function Login() {
     <section className="auth-container">
       <div className="card">
         <header className="card-header">
-          <span className="brand-eyebrow">LeahBlue Budget</span>
-          <h1 className="card-title">Welcome back</h1>
-          <p className="card-subtitle">Sign in to access your budget workspace.</p>
+          <span className="brand-eyebrow">MoneyFlow 360</span>
+          <h1 className="card-title">Welcome to Your MoneyFlow 360</h1>
+          <p className="card-headline">You got paid. You paid the bills. Now where did the rest go?</p>
+          <p className="card-subtitle">Every paycheck. Every bill. One clear picture.</p>
         </header>
 
         {error && (

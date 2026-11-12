@@ -128,10 +128,12 @@ function Dashboard() {
     <section className="dashboard-shell">
       <header className="dashboard-topbar">
         <div>
-          <span className="brand-eyebrow">Monthly Snapshot</span>
-          <h1 className="card-title">{formatMonthHeading(summary.month)} Overview</h1>
+          <span className="brand-eyebrow">MoneyFlow 360 • {formatMonthHeading(summary.month)}</span>
+          <h1 className="card-title">Welcome to Your MoneyFlow 360</h1>
+          <p className="dashboard-headline">You got paid. You paid the bills. Now where did the rest go?</p>
           <p className="card-subtitle">
-            {user?.email ? `Signed in as ${user.email}` : 'Your calm monthly snapshot'}
+            Every paycheck. Every bill. One clear picture.
+            {user?.email ? ` • Signed in as ${user.email}` : ''}
           </p>
         </div>
 

@@ -22,7 +22,10 @@ function Navbar() {
       <div className="navbar-inner">
         <Link className="navbar-brand" to={isAuthenticated ? '/dashboard' : '/'}>
           <span className="navbar-dot" aria-hidden="true" />
-          <span>LeahBlue Budget</span>
+          <span className="navbar-brand-group">
+            <span className="navbar-brand-name">MoneyFlow 360</span>
+            <span className="navbar-brand-signature">By Leah Blue</span>
+          </span>
         </Link>
 
         <nav className="navbar-links" aria-label="Main navigation">

@@ -93,7 +93,7 @@ a:hover {
 .navbar-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -102,7 +102,33 @@ a:hover {
 
 .navbar-brand:hover {
   text-decoration: none;
+}
+
+.navbar-brand-group {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.navbar-brand-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease;
+}
+
+.navbar-brand:hover .navbar-brand-name {
   color: var(--accent-blue-hover);
+}
+
+.navbar-brand-signature {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
 }
 
 .navbar-dot {
@@ -197,6 +223,15 @@ a:hover {
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.35rem;
+}
+
+.card-headline,
+.dashboard-headline {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0.2rem 0 0.35rem;
+  line-height: 1.4;
 }
 
 .card-subtitle {
