@@ -12,10 +12,36 @@ import {
 import { formatCurrency, formatUtcDate } from '../utils/formatters.js';
 
 const CADENCE_OPTIONS = [
-  { value: 'weekly', label: 'Weekly', monthlyMultiplier: 52 / 12 },
-  { value: 'biweekly', label: 'Every two weeks', monthlyMultiplier: 26 / 12 },
-  { value: 'twice-monthly', label: 'Twice monthly', monthlyMultiplier: 2 },
-  { value: 'monthly', label: 'Monthly', monthlyMultiplier: 1 },
+  {
+    value: 'weekly',
+    label: 'Weekly: Every week (52 paychecks/year)',
+    shortLabel: 'Weekly',
+    monthlyMultiplier: 52 / 12,
+  },
+  {
+    value: 'biweekly',
+    label: 'Biweekly: Every 2 weeks (26 paychecks/year)',
+    shortLabel: 'Biweekly',
+    monthlyMultiplier: 26 / 12,
+  },
+  {
+    value: 'twice-monthly',
+    label: 'Twice Monthly: Twice a month (24 paychecks/year)',
+    shortLabel: 'Twice Monthly',
+    monthlyMultiplier: 2,
+  },
+  {
+    value: 'monthly',
+    label: 'Monthly: Once a month (12 paychecks/year)',
+    shortLabel: 'Monthly',
+    monthlyMultiplier: 1,
+  },
+  {
+    value: 'irregular',
+    label: 'Irregular / Variable Income: My pay dates or income amounts change',
+    shortLabel: 'Irregular / Variable Income',
+    monthlyMultiplier: 1,
+  },
 ];
 
 function getTodayDateString() {
@@ -358,7 +384,7 @@ function Budget() {
 
               <div className="field-group">
                 <label className="field-label" htmlFor="income-cadence">
-                  Cadence
+                  Pay Frequency
                 </label>
                 <select
                   id="income-cadence"
@@ -374,6 +400,9 @@ function Budget() {
                     </option>
                   ))}
                 </select>
+                <p className="field-help">
+                  Biweekly means every 2 weeks. Twice monthly means 2 times each month, usually on set dates.
+                </p>
               </div>
             </div>
 
@@ -428,9 +457,8 @@ function Budget() {
             ) : (
               <ul className="transaction-list">
                 {incomes.map((income) => {
-                  const cadenceLabel =
-                    CADENCE_OPTIONS.find((opt) => opt.value === income.paySchedule)?.label ||
-                    income.paySchedule;
+                  const cadenceOption = CADENCE_OPTIONS.find((opt) => opt.value === income.paySchedule);
+                  const cadenceLabel = cadenceOption?.shortLabel || cadenceOption?.label || income.paySchedule;
                   const isBusy = busyIncomeId === income._id;
 
                   return (

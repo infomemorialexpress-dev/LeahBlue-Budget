@@ -3,10 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { createExpense, createIncome } from '../services/api.js';
 
 const PAY_SCHEDULE_OPTIONS = [
-  { value: 'weekly', label: 'Weekly', desc: 'Every week (52x / year)' },
-  { value: 'biweekly', label: 'Biweekly', desc: 'Every 2 weeks (26x / year)' },
-  { value: 'twice-monthly', label: 'Twice Monthly', desc: '1st & 15th (24x / year)' },
-  { value: 'monthly', label: 'Monthly', desc: 'Once a month (12x / year)' },
+  { value: 'weekly', label: 'Weekly', desc: 'Every week (52 paychecks/year)' },
+  { value: 'biweekly', label: 'Biweekly', desc: 'Every 2 weeks (26 paychecks/year)' },
+  { value: 'twice-monthly', label: 'Twice Monthly', desc: 'Twice a month (24 paychecks/year)' },
+  { value: 'monthly', label: 'Monthly', desc: 'Once a month (12 paychecks/year)' },
+  {
+    value: 'irregular',
+    label: 'Irregular / Variable Income',
+    desc: 'My pay dates or income amounts change',
+  },
 ];
 
 function getTodayDateString() {
@@ -157,6 +162,9 @@ function Onboarding() {
                   </button>
                 ))}
               </div>
+              <p className="field-help">
+                Biweekly means every 2 weeks. Twice monthly means 2 times each month, usually on set dates.
+              </p>
             </div>
 
             <div className="field-group">
