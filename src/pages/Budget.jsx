@@ -383,48 +383,46 @@ function Budget() {
               />
             </div>
 
-            <div className="schedule-grid">
-              <div className="field-group">
-                <label className="field-label" htmlFor="income-amount">
-                  Amount ($)
-                </label>
-                <input
-                  id="income-amount"
-                  className="field-input"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  placeholder="2000.00"
-                  value={incomeForm.amount}
-                  onChange={(e) =>
-                    setIncomeForm((prev) => ({ ...prev, amount: e.target.value }))
-                  }
-                  required
-                />
-              </div>
+            <div className="field-group">
+              <label className="field-label" htmlFor="income-amount">
+                Amount ($)
+              </label>
+              <input
+                id="income-amount"
+                className="field-input"
+                type="number"
+                min="0.01"
+                step="0.01"
+                placeholder="2000.00"
+                value={incomeForm.amount}
+                onChange={(e) =>
+                  setIncomeForm((prev) => ({ ...prev, amount: e.target.value }))
+                }
+                required
+              />
+            </div>
 
-              <div className="field-group">
-                <label className="field-label" htmlFor="income-cadence">
-                  Pay Frequency
-                </label>
-                <select
-                  id="income-cadence"
-                  className="field-input"
-                  value={incomeForm.paySchedule}
-                  onChange={(e) =>
-                    setIncomeForm((prev) => ({ ...prev, paySchedule: e.target.value }))
-                  }
-                >
-                  {CADENCE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="field-help">
-                  Biweekly means every 2 weeks. Twice monthly means 2 times each month, usually on set dates.
-                </p>
-              </div>
+            <div className="field-group">
+              <label className="field-label" htmlFor="income-cadence">
+                Pay Frequency
+              </label>
+              <select
+                id="income-cadence"
+                className="field-input"
+                value={incomeForm.paySchedule}
+                onChange={(e) =>
+                  setIncomeForm((prev) => ({ ...prev, paySchedule: e.target.value }))
+                }
+              >
+                {CADENCE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="field-help">
+                Biweekly means every 2 weeks. Twice monthly means 2 times each month, usually on set dates.
+              </p>
             </div>
 
             <div className="field-group">
