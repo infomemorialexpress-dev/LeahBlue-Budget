@@ -126,7 +126,10 @@ function Budget() {
 
     async function init() {
       const loadedIncomes = await loadIncomes(() => cancelled);
-      setCategoryBudgets(getCategoryBudgets(userKey));
+      const loadedBudgets = await getCategoryBudgets(userKey);
+      if (!cancelled && Array.isArray(loadedBudgets)) {
+        setCategoryBudgets(loadedBudgets);
+      }
 
       if (cancelled) return;
 
@@ -264,7 +267,7 @@ function Budget() {
     );
   };
 
-  const handleSaveCategoryBudgets = (event) => {
+  const handleSaveCategoryBudgets = async (event) => {
     event.preventDefault();
     setError('');
     const sanitized = categoryBudgets.map((item) => ({
@@ -272,11 +275,18 @@ function Budget() {
       targetAmount: Math.round(Math.max(0, Number(item.targetAmount || 0)) * 100) / 100,
     }));
     setCategoryBudgets(sanitized);
-    saveCategoryBudgets(userKey, sanitized);
-    setSuccessMessage('Category budgets saved.');
+    try {
+      const saved = await saveCategoryBudgets(userKey, sanitized);
+      if (Array.isArray(saved) && saved.length > 0) {
+        setCategoryBudgets(saved);
+      }
+      setSuccessMessage('Category budgets saved.');
+    } catch {
+      setSuccessMessage('Category budgets saved locally.');
+    }
   };
 
-  const handleAddCategory = (event) => {
+  const handleAddCategory = async (event) => {
     event.preventDefault();
     setError('');
     setSuccessMessage('');
@@ -298,17 +308,31 @@ function Budget() {
     const parsedTarget = Math.round(Math.max(0, Number(newCategoryTarget || 0)) * 100) / 100;
     const updated = [...categoryBudgets, { category: trimmedName, targetAmount: parsedTarget }];
     setCategoryBudgets(updated);
-    saveCategoryBudgets(userKey, updated);
     setNewCategoryName('');
     setNewCategoryTarget('');
-    setSuccessMessage(`Added "${trimmedName}" to category budgets.`);
+    try {
+      const saved = await saveCategoryBudgets(userKey, updated);
+      if (Array.isArray(saved) && saved.length > 0) {
+        setCategoryBudgets(saved);
+      }
+      setSuccessMessage(`Added "${trimmedName}" to category budgets.`);
+    } catch {
+      setSuccessMessage(`Added "${trimmedName}" to category budgets (saved locally).`);
+    }
   };
 
-  const handleRemoveCategory = (categoryName) => {
+  const handleRemoveCategory = async (categoryName) => {
     const updated = categoryBudgets.filter((item) => item.category !== categoryName);
     setCategoryBudgets(updated);
-    saveCategoryBudgets(userKey, updated);
-    setSuccessMessage(`Removed "${categoryName}" from category budgets.`);
+    try {
+      const saved = await saveCategoryBudgets(userKey, updated);
+      if (Array.isArray(saved)) {
+        setCategoryBudgets(saved);
+      }
+      setSuccessMessage(`Removed "${categoryName}" from category budgets.`);
+    } catch {
+      setSuccessMessage(`Removed "${categoryName}" from category budgets.`);
+    }
   };
 
   const { estimatedMonthlyIncome, plannedCategoryTotal, projectedRemainder } = useMemo(() => {

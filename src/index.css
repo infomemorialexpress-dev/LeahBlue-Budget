@@ -1321,3 +1321,25 @@ a:hover {
   color: var(--text-secondary);
   font-size: 0.85rem;
 }
+
+.badge-overdue {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #b33939;
+  background-color: #fde8e8;
+  border: 1px solid #f8b4b4;
+  border-radius: 999px;
+}
+
+.text-overdue {
+  color: #b33939 !important;
+  font-weight: 600;
+}
+
+.bill-item.is-overdue {
+  border-left: 3px solid #b33939;
+  background-color: #fffaf9;
+}

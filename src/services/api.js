@@ -196,18 +196,83 @@ const DEFAULT_CATEGORY_BUDGETS = [
   { category: 'Other', targetAmount: 50 },
 ];
 
-export function getCategoryBudgets(userKey = 'default') {
+export async function getCategoryBudgets(userKey = 'default') {
   try {
+    const data = await apiRequest('/category-budgets');
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map((b) => ({
+        id: b._id || b.id,
+        category: b.name || b.category,
+        targetAmount: Number(b.monthlyTarget ?? b.targetAmount ?? 0),
+      }));
+    }
+
+    // Auto-migrate from localStorage if backend has no budgets yet
+    const raw = localStorage.getItem(`leahblue_category_budgets_${userKey}`);
+    const localBudgets = raw ? JSON.parse(raw) : DEFAULT_CATEGORY_BUDGETS;
+    const toSave =
+      Array.isArray(localBudgets) && localBudgets.length > 0
+        ? localBudgets
+        : DEFAULT_CATEGORY_BUDGETS;
+    const synced = await syncCategoryBudgets(toSave);
+    return Array.isArray(synced) && synced.length > 0
+      ? synced.map((b) => ({
+          id: b._id || b.id,
+          category: b.name || b.category,
+          targetAmount: Number(b.monthlyTarget ?? b.targetAmount ?? 0),
+        }))
+      : toSave;
+  } catch {
     const raw = localStorage.getItem(`leahblue_category_budgets_${userKey}`);
     if (!raw) return DEFAULT_CATEGORY_BUDGETS;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_CATEGORY_BUDGETS;
-  } catch {
-    return DEFAULT_CATEGORY_BUDGETS;
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_CATEGORY_BUDGETS;
+    } catch {
+      return DEFAULT_CATEGORY_BUDGETS;
+    }
   }
 }
 
-export function saveCategoryBudgets(userKey = 'default', budgets = []) {
-  localStorage.setItem(`leahblue_category_budgets_${userKey}`, JSON.stringify(budgets));
-  return budgets;
+export async function saveCategoryBudgets(userKey = 'default', budgets = []) {
+  try {
+    localStorage.setItem(`leahblue_category_budgets_${userKey}`, JSON.stringify(budgets));
+    const synced = await syncCategoryBudgets(budgets);
+    return Array.isArray(synced) && synced.length > 0
+      ? synced.map((b) => ({
+          id: b._id || b.id,
+          category: b.name || b.category,
+          targetAmount: Number(b.monthlyTarget ?? b.targetAmount ?? 0),
+        }))
+      : budgets;
+  } catch {
+    return budgets;
+  }
+}
+
+export function syncCategoryBudgets(budgets) {
+  return apiRequest('/category-budgets', {
+    method: 'PUT',
+    body: JSON.stringify({ budgets }),
+  });
+}
+
+export function createCategoryBudget(payload) {
+  return apiRequest('/category-budgets', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCategoryBudget(id, payload) {
+  return apiRequest(`/category-budgets/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteCategoryBudget(id) {
+  return apiRequest(`/category-budgets/${id}`, {
+    method: 'DELETE',
+  });
 }

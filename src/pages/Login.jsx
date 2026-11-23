@@ -32,8 +32,8 @@ function Login() {
         <header className="card-header">
           <span className="brand-eyebrow">MoneyFlow 360</span>
           <h1 className="card-title">Welcome to Your MoneyFlow 360</h1>
-          <p className="card-headline">You got paid. You paid the bills. Now where did the rest go?</p>
-          <p className="card-subtitle">Every paycheck. Every bill. One clear picture.</p>
+          <p className="card-headline">Know what's coming in, what's going out, and what's safe to spend.</p>
+          <p className="card-subtitle">Every paycheck accounted for. Every dollar with a purpose.</p>
         </header>
 
         {error && (

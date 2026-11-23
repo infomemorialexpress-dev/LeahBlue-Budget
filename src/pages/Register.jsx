@@ -36,7 +36,7 @@ function Register() {
         <header className="card-header">
           <span className="brand-eyebrow">MoneyFlow 360</span>
           <h1 className="card-title">Create your account</h1>
-          <p className="card-headline">Every paycheck. Every bill. One clear picture.</p>
+          <p className="card-headline">Every paycheck accounted for. Every dollar with a purpose.</p>
           <p className="card-subtitle">
             Enter your Stan Store Access Key to unlock your budget planner.
           </p>

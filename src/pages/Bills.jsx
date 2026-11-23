@@ -367,16 +367,27 @@ function Bills() {
                 return (
                   <li
                     key={bill._id}
-                    className={`transaction-item bill-item ${bill.isPaid ? 'is-paid' : ''}`}
+                    className={`transaction-item bill-item ${bill.isPaid ? 'is-paid' : ''} ${bill.isOverdue && !bill.isPaid ? 'is-overdue' : ''}`}
                   >
                     <div className="transaction-main">
-                      <div className="transaction-title">{bill.name}</div>
+                      <div className="transaction-title">
+                        {bill.name}
+                        {bill.isOverdue && !bill.isPaid && (
+                          <span className="badge-overdue" style={{ marginLeft: '0.5rem' }}>
+                            Overdue
+                          </span>
+                        )}
+                      </div>
                       <div className="transaction-meta">
                         <span className="category-tag">{bill.category}</span>
-                        <span>Due {formatOrdinalDay(bill.dueDate)}</span>
+                        <span className={bill.isOverdue && !bill.isPaid ? 'text-overdue' : ''}>
+                          Due {formatOrdinalDay(bill.dueDate)}
+                        </span>
                         <span>· {frequencyLabel}</span>
                         {bill.isPaid ? (
                           <span className="badge-success">Paid</span>
+                        ) : bill.isOverdue ? (
+                          <span className="badge-overdue">Overdue</span>
                         ) : (
                           <span className="badge-unpaid">Unpaid</span>
                         )}

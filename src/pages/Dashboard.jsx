@@ -130,9 +130,9 @@ function Dashboard() {
         <div>
           <span className="brand-eyebrow">MoneyFlow 360 • {formatMonthHeading(summary.month)}</span>
           <h1 className="card-title">Welcome to Your MoneyFlow 360</h1>
-          <p className="dashboard-headline">You got paid. You paid the bills. Now where did the rest go?</p>
+          <p className="dashboard-headline">Know what's coming in, what's going out, and what's safe to spend.</p>
           <p className="card-subtitle">
-            Every paycheck. Every bill. One clear picture.
+            Every paycheck accounted for. Every dollar with a purpose.
             {user?.email ? ` • Signed in as ${user.email}` : ''}
           </p>
         </div>
@@ -253,12 +253,22 @@ function Dashboard() {
         ) : (
           <ul className="transaction-list">
             {summary.upcomingBills.map((bill) => (
-              <li key={bill._id} className="transaction-item">
+              <li
+                key={bill._id}
+                className={`transaction-item ${bill.isOverdue ? 'is-overdue' : ''}`}
+              >
                 <div className="transaction-main">
-                  <div className="transaction-title">{bill.name}</div>
+                  <div className="transaction-title">
+                    {bill.name}
+                    {bill.isOverdue && (
+                      <span className="badge-overdue" style={{ marginLeft: '0.5rem' }}>
+                        Overdue
+                      </span>
+                    )}
+                  </div>
                   <div className="transaction-meta">
                     <span className="category-tag">{bill.category}</span>
-                    <span>
+                    <span className={bill.isOverdue ? 'text-overdue' : ''}>
                       Due {formatOrdinalDay(bill.dueDate)} ({formatUtcDate(bill.nextDueDate)})
                     </span>
                   </div>
