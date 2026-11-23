@@ -1,4 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import logoImg from '../assets/Money Flow 360 Logo.png';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const NAV_ITEMS = [
@@ -22,11 +23,11 @@ function Navbar() {
     <header className="site-navbar">
       <div className="navbar-inner">
         <Link className="navbar-brand" to={isAuthenticated ? '/dashboard' : '/'}>
-          <span className="navbar-dot" aria-hidden="true" />
-          <span className="navbar-brand-group">
-            <span className="navbar-brand-name">MoneyFlow 360</span>
-            <span className="navbar-brand-signature">By Leah Blue</span>
-          </span>
+          <img
+            src={logoImg}
+            alt="MoneyFlow 360 By Leah Blue"
+            className="navbar-brand-img"
+          />
         </Link>
 
         {isAuthenticated && (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import logoImg from '../assets/Money Flow 360 Logo.png';
 import { useAuth } from '../context/AuthContext.jsx';
 import { verifyActivationToken } from '../services/api.js';
 
@@ -78,6 +79,9 @@ function Register() {
   return (
     <section className="auth-container">
       <div className="card">
+        <div className="auth-logo-wrap">
+          <img src={logoImg} alt="MoneyFlow 360 By Leah Blue" className="auth-brand-logo" />
+        </div>
         <header className="card-header">
           <span className="brand-eyebrow">MoneyFlow 360</span>
           <h1 className="card-title">Create your account</h1>

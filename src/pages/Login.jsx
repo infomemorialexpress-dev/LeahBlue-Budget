@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import logoImg from '../assets/Money Flow 360 Logo.png';
 import { useAuth } from '../context/AuthContext.jsx';
 
 function Login() {
@@ -29,6 +30,9 @@ function Login() {
   return (
     <section className="auth-container">
       <div className="card">
+        <div className="auth-logo-wrap">
+          <img src={logoImg} alt="MoneyFlow 360 By Leah Blue" className="auth-brand-logo" />
+        </div>
         <header className="card-header">
           <span className="brand-eyebrow">MoneyFlow 360</span>
           <h1 className="card-title">Welcome to Your MoneyFlow 360</h1>

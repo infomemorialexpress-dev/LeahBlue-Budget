@@ -3,7 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddExpense from '../components/AddExpense.jsx';
 import WeeklyCheckInModal from '../components/WeeklyCheckInModal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { deleteExpense, getDashboardSummary, getExpenses } from '../services/api.js';
+import {
+  deleteExpense,
+  getBills,
+  getDashboardSummary,
+  getExpenses,
+  getIncome,
+  getPaycheckPlans,
+} from '../services/api.js';
 import {
   formatCurrency,
   formatOrdinalDay,
@@ -51,26 +58,50 @@ function Dashboard() {
   const [deletingId, setDeletingId] = useState('');
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [error, setError] = useState('');
+  const [checklistStatus, setChecklistStatus] = useState({
+    hasIncome: false,
+    hasBills: false,
+    hasPlan: false,
+  });
+  const [isChecklistDismissed, setIsChecklistDismissed] = useState(
+    () => localStorage.getItem('mf360_checklist_dismissed') === 'true',
+  );
 
   const fetchDashboardData = useCallback(
     async (isCancelled) => {
       const checkCancelled = typeof isCancelled === 'function' ? isCancelled : () => false;
       setError('');
       try {
-        const [summaryData, expenseList] = await Promise.all([
+        const [summaryData, expenseList, incomeList, billList, planList] = await Promise.all([
           getDashboardSummary(),
           getExpenses(),
+          getIncome().catch(() => []),
+          getBills().catch(() => []),
+          getPaycheckPlans().catch(() => []),
         ]);
 
         if (checkCancelled()) return;
 
         setSummary({
           month: summaryData.month || '',
+          incomeReceivedThisMonth: Number(summaryData.incomeReceivedThisMonth || 0),
+          projectedMonthlyIncome: Number(summaryData.projectedMonthlyIncome || 0),
           currentMonthIncome: Number(summaryData.currentMonthIncome || 0),
           currentMonthExpenses: Number(summaryData.currentMonthExpenses || 0),
           upcomingBillsTotal: Number(summaryData.upcomingBillsTotal || 0),
+          billsToPrepareFor: Number(
+            summaryData.billsToPrepareFor ?? summaryData.upcomingBillsTotal ?? 0,
+          ),
           totalSavingsContributions: Number(summaryData.totalSavingsContributions || 0),
-          remainingBudget: Number(summaryData.remainingBudget || 0),
+          savingsThisMonth: Number(
+            summaryData.savingsThisMonth ?? summaryData.totalSavingsContributions ?? 0,
+          ),
+          availableUntilPayday: Number(
+            summaryData.availableUntilPayday ?? summaryData.remainingBudget ?? 0,
+          ),
+          remainingBudget: Number(
+            summaryData.availableUntilPayday ?? summaryData.remainingBudget ?? 0,
+          ),
           expensesByCategory: Array.isArray(summaryData.expensesByCategory)
             ? summaryData.expensesByCategory
             : [],
@@ -80,6 +111,11 @@ function Dashboard() {
             : [],
         });
         setExpenses(Array.isArray(expenseList) ? expenseList : []);
+        setChecklistStatus({
+          hasIncome: Array.isArray(incomeList) && incomeList.length > 0,
+          hasBills: Array.isArray(billList) && billList.length > 0,
+          hasPlan: Array.isArray(planList) && planList.length > 0,
+        });
       } catch (err) {
         if (checkCancelled()) return;
         if (err.status === 401) {
@@ -139,6 +175,15 @@ function Dashboard() {
     0,
   );
 
+  const isAllStepsCompleted =
+    checklistStatus.hasIncome && checklistStatus.hasBills && checklistStatus.hasPlan;
+  const showChecklist = !isAllStepsCompleted && !isChecklistDismissed && !loading;
+
+  const handleDismissChecklist = () => {
+    setIsChecklistDismissed(true);
+    localStorage.setItem('mf360_checklist_dismissed', 'true');
+  };
+
   return (
     <section className="dashboard-shell">
       <header className="dashboard-topbar">
@@ -170,6 +215,97 @@ function Dashboard() {
       </header>
 
       {error && <div className="alert-error">{error}</div>}
+
+      {/* Guided Empty State / Getting Started Checklist */}
+      {showChecklist && (
+        <section className="getting-started-card" aria-label="Getting Started Checklist">
+          <div className="getting-started-header">
+            <div>
+              <span className="brand-eyebrow">Getting Started Checklist</span>
+              <h2 className="panel-title" style={{ fontSize: '1.25rem' }}>
+                Welcome to MoneyFlow 360
+              </h2>
+              <p className="card-subtitle" style={{ fontSize: '0.875rem' }}>
+                Complete these 3 simple steps to take total control of your money and know your Safe-to-Spend number.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn-dismiss-checklist"
+              onClick={handleDismissChecklist}
+              title="Dismiss checklist"
+              aria-label="Dismiss checklist"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="getting-started-steps">
+            {/* Step 1 */}
+            <Link
+              to="/budget"
+              className={`getting-started-step ${checklistStatus.hasIncome ? 'is-complete' : 'is-pending'}`}
+            >
+              <span className="step-check-circle">
+                {checklistStatus.hasIncome ? '✓' : '1'}
+              </span>
+              <div className="step-info">
+                <strong className="step-title">Add your first paycheck</strong>
+                <span className="step-desc">
+                  {checklistStatus.hasIncome
+                    ? 'Completed — Paycheck schedule saved'
+                    : 'Enter your paycheck amount, frequency, and pay dates'}
+                </span>
+              </div>
+              <span className="step-action-arrow">
+                {checklistStatus.hasIncome ? 'Edit →' : 'Start →'}
+              </span>
+            </Link>
+
+            {/* Step 2 */}
+            <Link
+              to="/bills"
+              className={`getting-started-step ${checklistStatus.hasBills ? 'is-complete' : 'is-pending'}`}
+            >
+              <span className="step-check-circle">
+                {checklistStatus.hasBills ? '✓' : '2'}
+              </span>
+              <div className="step-info">
+                <strong className="step-title">Add your upcoming bills</strong>
+                <span className="step-desc">
+                  {checklistStatus.hasBills
+                    ? 'Completed — Recurring bills tracked'
+                    : 'Add rent, utilities, subscriptions, and due dates'}
+                </span>
+              </div>
+              <span className="step-action-arrow">
+                {checklistStatus.hasBills ? 'Manage →' : 'Start →'}
+              </span>
+            </Link>
+
+            {/* Step 3 */}
+            <Link
+              to="/plan-paycheck"
+              className={`getting-started-step ${checklistStatus.hasPlan ? 'is-complete' : 'is-pending'}`}
+            >
+              <span className="step-check-circle">
+                {checklistStatus.hasPlan ? '✓' : '3'}
+              </span>
+              <div className="step-info">
+                <strong className="step-title">Plan your first paycheck</strong>
+                <span className="step-desc">
+                  {checklistStatus.hasPlan
+                    ? 'Completed — Paycheck allocation saved'
+                    : 'Reserve upcoming bills, everyday categories, and know your buffer'}
+                </span>
+              </div>
+              <span className="step-action-arrow">
+                {checklistStatus.hasPlan ? 'Review →' : 'Plan →'}
+              </span>
+            </Link>
+          </div>
+        </section>
+      )}
 
       <div className="summary-grid" aria-label="Monthly budget summary">
         {/* Card 1: Available until payday */}
