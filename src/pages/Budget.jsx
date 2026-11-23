@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import HowItWorks from '../components/HowItWorks.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
+  DEFAULT_CATEGORY_BUDGETS,
   createIncome,
   deleteIncome,
   getCategoryBudgets,
@@ -78,7 +79,7 @@ function Budget() {
   const [incomeForm, setIncomeForm] = useState(INITIAL_INCOME_FORM);
   const [editingIncomeId, setEditingIncomeId] = useState('');
 
-  const [categoryBudgets, setCategoryBudgets] = useState(() => getCategoryBudgets(userKey));
+  const [categoryBudgets, setCategoryBudgets] = useState(DEFAULT_CATEGORY_BUDGETS);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryTarget, setNewCategoryTarget] = useState('');
 
@@ -279,22 +280,24 @@ function Budget() {
   };
 
   const handleCategoryAmountChange = (index, nextValue) => {
-    setCategoryBudgets((prev) =>
-      prev.map((item, idx) =>
+    setCategoryBudgets((prev) => {
+      const list = Array.isArray(prev) ? prev : [];
+      return list.map((item, idx) =>
         idx === index
           ? {
               ...item,
               targetAmount: nextValue === '' ? '' : Math.max(0, Number(nextValue)),
             }
           : item,
-      ),
-    );
+      );
+    });
   };
 
   const handleSaveCategoryBudgets = async (event) => {
     event.preventDefault();
     setError('');
-    const sanitized = categoryBudgets.map((item) => ({
+    const list = Array.isArray(categoryBudgets) ? categoryBudgets : [];
+    const sanitized = list.map((item) => ({
       category: item.category,
       targetAmount: Math.round(Math.max(0, Number(item.targetAmount || 0)) * 100) / 100,
     }));
@@ -321,8 +324,9 @@ function Budget() {
       return;
     }
 
-    const exists = categoryBudgets.some(
-      (item) => item.category.toLowerCase() === trimmedName.toLowerCase(),
+    const list = Array.isArray(categoryBudgets) ? categoryBudgets : [];
+    const exists = list.some(
+      (item) => (item?.category || '').toLowerCase() === trimmedName.toLowerCase(),
     );
     if (exists) {
       setError(`"${trimmedName}" is already in your category budgets.`);
@@ -330,7 +334,7 @@ function Budget() {
     }
 
     const parsedTarget = Math.round(Math.max(0, Number(newCategoryTarget || 0)) * 100) / 100;
-    const updated = [...categoryBudgets, { category: trimmedName, targetAmount: parsedTarget }];
+    const updated = [...list, { category: trimmedName, targetAmount: parsedTarget }];
     setCategoryBudgets(updated);
     setNewCategoryName('');
     setNewCategoryTarget('');
@@ -346,7 +350,8 @@ function Budget() {
   };
 
   const handleRemoveCategory = async (categoryName) => {
-    const updated = categoryBudgets.filter((item) => item.category !== categoryName);
+    const list = Array.isArray(categoryBudgets) ? categoryBudgets : [];
+    const updated = list.filter((item) => item.category !== categoryName);
     setCategoryBudgets(updated);
     try {
       const saved = await saveCategoryBudgets(userKey, updated);
@@ -360,12 +365,15 @@ function Budget() {
   };
 
   const { estimatedMonthlyIncome, plannedCategoryTotal, projectedRemainder } = useMemo(() => {
-    const incomeCents = incomes.reduce(
-      (sum, item) => sum + toMonthlyIncomeCents(item.amount, item.paySchedule),
+    const safeIncomes = Array.isArray(incomes) ? incomes : [];
+    const safeBudgets = Array.isArray(categoryBudgets) ? categoryBudgets : [];
+
+    const incomeCents = safeIncomes.reduce(
+      (sum, item) => sum + toMonthlyIncomeCents(item?.amount, item?.paySchedule),
       0,
     );
-    const budgetCents = categoryBudgets.reduce(
-      (sum, item) => sum + roundCents(item.targetAmount),
+    const budgetCents = safeBudgets.reduce(
+      (sum, item) => sum + roundCents(item?.targetAmount),
       0,
     );
     return {
@@ -377,6 +385,8 @@ function Budget() {
 
   const remainderClass =
     projectedRemainder >= 0 ? 'metric-value is-positive' : 'metric-value is-negative';
+
+  const safeCategoryBudgets = Array.isArray(categoryBudgets) ? categoryBudgets : [];
 
   return (
     <section className="dashboard-shell">
@@ -409,7 +419,7 @@ function Budget() {
         <article className="metric-card">
           <span className="metric-label">Planned Category Budgets</span>
           <strong className="metric-value">{formatCurrency(plannedCategoryTotal)}</strong>
-          <span className="metric-hint">Total allocated across {categoryBudgets.length} categories</span>
+          <span className="metric-hint">Total allocated across {safeCategoryBudgets.length} categories</span>
         </article>
 
         <article className="metric-card is-highlight">
@@ -676,7 +686,7 @@ function Budget() {
           </header>
 
           <form className="form-stack" onSubmit={handleSaveCategoryBudgets}>
-            {categoryBudgets.length === 0 ? (
+            {safeCategoryBudgets.length === 0 ? (
               <div className="empty-state">
                 <strong className="empty-state-title">No category budgets yet</strong>
                 <p className="empty-state-desc">
@@ -685,7 +695,7 @@ function Budget() {
               </div>
             ) : (
               <div className="budget-category-list">
-                {categoryBudgets.map((item, index) => (
+                {safeCategoryBudgets.map((item, index) => (
                   <div key={item.category} className="budget-category-card">
                     <div className="budget-category-info">
                       <label

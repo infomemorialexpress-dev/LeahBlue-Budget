@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
   createPaycheckPlan,
+  deletePaycheckPlan,
   getPaycheckPlans,
   getPaycheckPlanSuggestion,
 } from '../services/api.js';
@@ -14,6 +15,7 @@ function PaycheckPlanner() {
 
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingPlanId, setDeletingPlanId] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -197,6 +199,21 @@ function PaycheckPlanner() {
       handleAuthOrError(err, 'Could not save paycheck plan.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeletePlan = async (planId) => {
+    setError('');
+    setSuccessMessage('');
+    setDeletingPlanId(planId);
+    try {
+      await deletePaycheckPlan(planId);
+      setSuccessMessage('Paycheck plan removed.');
+      setSavedPlans((prev) => prev.filter((p) => p._id !== planId));
+    } catch (err) {
+      handleAuthOrError(err, 'Could not delete paycheck plan.');
+    } finally {
+      setDeletingPlanId('');
     }
   };
 
@@ -567,9 +584,22 @@ function PaycheckPlanner() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {savedPlans.map((plan) => (
                 <article key={plan._id} className="surface-panel" style={{ padding: '0.9rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                     <strong>{formatUtcDate(plan.payDate)}</strong>
-                    <span className="badge-success">{formatCurrency(plan.paycheckAmount)}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span className="badge-success">{formatCurrency(plan.paycheckAmount)}</span>
+                      <button
+                        type="button"
+                        className="btn-delete"
+                        style={{ fontSize: '0.725rem', padding: '0.15rem 0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--accent-coral)' }}
+                        onClick={() => handleDeletePlan(plan._id)}
+                        disabled={deletingPlanId === plan._id}
+                        aria-label="Delete this plan"
+                        title="Delete plan"
+                      >
+                        {deletingPlanId === plan._id ? '...' : '✕'}
+                      </button>
+                    </div>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                     <div>Reserved Bills: {formatCurrency(plan.reservedBillsTotal)}</div>

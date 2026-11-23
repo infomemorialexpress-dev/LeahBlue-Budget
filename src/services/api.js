@@ -191,7 +191,7 @@ export function deleteGoal(id) {
   });
 }
 
-const DEFAULT_CATEGORY_BUDGETS = [
+export const DEFAULT_CATEGORY_BUDGETS = [
   { category: 'Groceries', targetAmount: 400 },
   { category: 'Gas', targetAmount: 100 },
   { category: 'Kids', targetAmount: 150 },
@@ -293,5 +293,11 @@ export function createPaycheckPlan(payload) {
   return apiRequest('/paycheck-plans', {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+}
+
+export function deletePaycheckPlan(id) {
+  return apiRequest(`/paycheck-plans/${id}`, {
+    method: 'DELETE',
   });
 }

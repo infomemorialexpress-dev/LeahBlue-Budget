@@ -371,20 +371,22 @@ function Dashboard() {
         </article>
       </div>
 
-      {/* Plan My Paycheck Guided Callout */}
-      <div className="plan-paycheck-banner">
-        <div>
-          <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>
-            🎯 Ready to give your next paycheck a plan?
-          </strong>
-          <p className="card-subtitle" style={{ fontSize: '0.875rem', marginTop: '0.15rem' }}>
-            Walk through our 4-step guided allocator: reserve upcoming bills, budget everyday categories, and know your guilt-free spending limit.
-          </p>
+      {/* Plan My Paycheck Guided Callout (Hidden once user has saved at least 1 plan) */}
+      {!checklistStatus.hasPlan && (
+        <div className="plan-paycheck-banner">
+          <div>
+            <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>
+              🎯 Ready to give your next paycheck a plan?
+            </strong>
+            <p className="card-subtitle" style={{ fontSize: '0.875rem', marginTop: '0.15rem' }}>
+              Walk through our 4-step guided allocator: reserve upcoming bills, budget everyday categories, and know your guilt-free spending limit.
+            </p>
+          </div>
+          <Link className="btn-primary" to="/plan-paycheck" style={{ whiteSpace: 'nowrap' }}>
+            Plan My Paycheck →
+          </Link>
         </div>
-        <Link className="btn-primary" to="/plan-paycheck" style={{ whiteSpace: 'nowrap' }}>
-          Plan My Paycheck →
-        </Link>
-      </div>
+      )}
 
       <section className="upcoming-bills-card" aria-labelledby="upcoming-bills-heading">
         <header className="upcoming-bills-header">
