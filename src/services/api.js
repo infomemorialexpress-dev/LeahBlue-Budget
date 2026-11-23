@@ -276,3 +276,18 @@ export function deleteCategoryBudget(id) {
     method: 'DELETE',
   });
 }
+
+export function getPaycheckPlanSuggestion() {
+  return apiRequest('/paycheck-plans/suggest');
+}
+
+export function getPaycheckPlans() {
+  return apiRequest('/paycheck-plans');
+}
+
+export function createPaycheckPlan(payload) {
+  return apiRequest('/paycheck-plans', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}

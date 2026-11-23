@@ -1410,3 +1410,122 @@ a:hover {
 .btn-undo-subtle:hover {
   color: var(--error-text);
 }
+
+.plan-paycheck-banner {
+  background-color: var(--accent-blue-soft);
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.planner-summary-banner {
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-warm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  background-color: var(--bg-ivory);
+}
+
+.planner-summary-banner.is-buffer {
+  background-color: var(--accent-blue-soft);
+  border-color: var(--accent-blue);
+}
+
+.planner-summary-banner.is-balanced {
+  background-color: var(--success-sage-soft);
+  border-color: var(--success-sage);
+}
+
+.planner-summary-banner.is-over {
+  background-color: var(--error-soft);
+  border-color: var(--error-border);
+}
+
+.planner-summary-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.planner-summary-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.planner-summary-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.planner-summary-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.planner-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .planner-layout-grid {
+    grid-template-columns: 1.35fr 0.65fr;
+  }
+}
+
+.btn-quick-adjust {
+  background-color: var(--surface-beige);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-quick-adjust:hover {
+  background-color: var(--surface-beige-hover);
+  color: var(--text-primary);
+}
+
+.btn-remove-category {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-remove-category:hover {
+  color: var(--error-text);
+  background-color: var(--error-soft);
+}
+
+.transaction-item.is-reserved {
+  border-left: 3px solid var(--accent-blue);
+}
+
+.transaction-item.is-unreserved {
+  opacity: 0.6;
+}

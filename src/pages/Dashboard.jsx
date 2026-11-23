@@ -153,13 +153,15 @@ function Dashboard() {
         </div>
 
         <div className="topbar-actions">
-          <span className="badge-success">Access Active</span>
+          <Link className="btn-primary btn-topbar-primary" to="/plan-paycheck">
+            🎯 Plan My Paycheck
+          </Link>
           <Link className="btn-secondary" to="/onboarding">
             Paycheck Setup
           </Link>
           <button
             type="button"
-            className="btn-primary btn-topbar-primary"
+            className="btn-secondary"
             onClick={() => setIsCheckInOpen(true)}
           >
             Weekly Check-In
@@ -231,6 +233,21 @@ function Dashboard() {
           </strong>
           <span className="metric-hint">Allocated for savings goals</span>
         </article>
+      </div>
+
+      {/* Plan My Paycheck Guided Callout */}
+      <div className="plan-paycheck-banner">
+        <div>
+          <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>
+            🎯 Ready to give your next paycheck a plan?
+          </strong>
+          <p className="card-subtitle" style={{ fontSize: '0.875rem', marginTop: '0.15rem' }}>
+            Walk through our 4-step guided allocator: reserve upcoming bills, budget everyday categories, and know your guilt-free spending limit.
+          </p>
+        </div>
+        <Link className="btn-primary" to="/plan-paycheck" style={{ whiteSpace: 'nowrap' }}>
+          Plan My Paycheck →
+        </Link>
       </div>
 
       <section className="upcoming-bills-card" aria-labelledby="upcoming-bills-heading">

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 const NAV_ITEMS = [
   { label: 'Home', to: '/dashboard' },
+  { label: 'Plan Paycheck', to: '/plan-paycheck' },
   { label: 'Budget', to: '/budget' },
   { label: 'Bills', to: '/bills' },
   { label: 'Goals', to: '/goals' },
