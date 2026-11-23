@@ -101,9 +101,9 @@ a:hover {
 }
 
 .navbar-brand-img {
-  height: 52px;
+  height: 44px;
   width: auto;
-  max-width: 220px;
+  max-width: 190px;
   object-fit: contain;
   mix-blend-mode: multiply;
   display: block;
@@ -1557,14 +1557,14 @@ a:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .auth-brand-logo {
-  height: 100px;
-  max-height: 115px;
+  height: auto;
+  max-height: 85px;
   width: auto;
-  max-width: 100%;
+  max-width: 220px;
   object-fit: contain;
   mix-blend-mode: multiply;
   display: block;
