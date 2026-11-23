@@ -10,7 +10,7 @@ import {
   saveCategoryBudgets,
   updateIncome,
 } from '../services/api.js';
-import { formatCurrency, formatUtcDate } from '../utils/formatters.js';
+import { formatCurrency, formatOrdinalDay, formatUtcDate } from '../utils/formatters.js';
 
 const CADENCE_OPTIONS = [
   {
@@ -64,6 +64,8 @@ const INITIAL_INCOME_FORM = {
   amount: '',
   paySchedule: 'biweekly',
   nextPayDate: getTodayDateString(),
+  firstPayDay: '1',
+  secondPayDay: '15',
 };
 
 function Budget() {
@@ -150,6 +152,8 @@ function Budget() {
             nextPayDate: firstIncome.nextPayDate
               ? String(firstIncome.nextPayDate).slice(0, 10)
               : getTodayDateString(),
+            firstPayDay: String(firstIncome.firstPayDay ?? '1'),
+            secondPayDay: String(firstIncome.secondPayDay ?? '15'),
           });
         }
 
@@ -200,8 +204,26 @@ function Budget() {
       sourceName: incomeForm.sourceName.trim(),
       amount: Math.round(numericAmount * 100) / 100,
       paySchedule: incomeForm.paySchedule,
-      nextPayDate: incomeForm.nextPayDate || getTodayDateString(),
     };
+
+    if (incomeForm.paySchedule === 'twice-monthly') {
+      const d1 = Number(incomeForm.firstPayDay || 1);
+      const d2 = Number(incomeForm.secondPayDay || 15);
+      if (!Number.isInteger(d1) || d1 < 1 || d1 > 31 || !Number.isInteger(d2) || d2 < 1 || d2 > 31) {
+        setError('Both pay days must be whole numbers between 1 and 31.');
+        return;
+      }
+      payload.firstPayDay = d1;
+      payload.secondPayDay = d2;
+    } else if (incomeForm.paySchedule === 'irregular') {
+      payload.nextPayDate = incomeForm.nextPayDate || getTodayDateString();
+    } else {
+      if (!incomeForm.nextPayDate) {
+        setError('Please select your next pay date.');
+        return;
+      }
+      payload.nextPayDate = incomeForm.nextPayDate;
+    }
 
     setIsSavingIncome(true);
     try {
@@ -232,6 +254,8 @@ function Budget() {
       nextPayDate: income.nextPayDate
         ? String(income.nextPayDate).slice(0, 10)
         : getTodayDateString(),
+      firstPayDay: String(income.firstPayDay ?? '1'),
+      secondPayDay: String(income.secondPayDay ?? '15'),
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -478,21 +502,80 @@ function Budget() {
               </p>
             </div>
 
-            <div className="field-group">
-              <label className="field-label" htmlFor="income-next-pay">
-                Next Pay Date
-              </label>
-              <input
-                id="income-next-pay"
-                className="field-input"
-                type="date"
-                value={incomeForm.nextPayDate}
-                onChange={(e) =>
-                  setIncomeForm((prev) => ({ ...prev, nextPayDate: e.target.value }))
-                }
-                required
-              />
-            </div>
+            {incomeForm.paySchedule === 'twice-monthly' ? (
+              <div className="schedule-grid">
+                <div className="field-group">
+                  <label className="field-label" htmlFor="income-first-pay-day">
+                    First Pay Day (1–31)
+                  </label>
+                  <input
+                    id="income-first-pay-day"
+                    className="field-input"
+                    type="number"
+                    min="1"
+                    max="31"
+                    step="1"
+                    placeholder="1"
+                    value={incomeForm.firstPayDay}
+                    onChange={(e) =>
+                      setIncomeForm((prev) => ({ ...prev, firstPayDay: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label" htmlFor="income-second-pay-day">
+                    Second Pay Day (1–31)
+                  </label>
+                  <input
+                    id="income-second-pay-day"
+                    className="field-input"
+                    type="number"
+                    min="1"
+                    max="31"
+                    step="1"
+                    placeholder="15"
+                    value={incomeForm.secondPayDay}
+                    onChange={(e) =>
+                      setIncomeForm((prev) => ({ ...prev, secondPayDay: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+              </div>
+            ) : incomeForm.paySchedule === 'irregular' ? (
+              <div className="field-group">
+                <label className="field-label" htmlFor="income-date-received">
+                  Date Received (Optional)
+                </label>
+                <input
+                  id="income-date-received"
+                  className="field-input"
+                  type="date"
+                  value={incomeForm.nextPayDate}
+                  onChange={(e) =>
+                    setIncomeForm((prev) => ({ ...prev, nextPayDate: e.target.value }))
+                  }
+                />
+              </div>
+            ) : (
+              <div className="field-group">
+                <label className="field-label" htmlFor="income-next-pay">
+                  Next Pay Date
+                </label>
+                <input
+                  id="income-next-pay"
+                  className="field-input"
+                  type="date"
+                  value={incomeForm.nextPayDate}
+                  onChange={(e) =>
+                    setIncomeForm((prev) => ({ ...prev, nextPayDate: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+            )}
 
             <div className="action-row">
               {editingIncomeId && (
@@ -539,8 +622,16 @@ function Budget() {
                         <div className="transaction-title">{income.sourceName}</div>
                         <div className="transaction-meta">
                           <span className="category-tag">{cadenceLabel}</span>
-                          {income.nextPayDate && (
-                            <span>Next pay: {formatUtcDate(income.nextPayDate)}</span>
+                          {income.paySchedule === 'twice-monthly' && (income.firstPayDay || income.secondPayDay) ? (
+                            <span>
+                              Pay days: {formatOrdinalDay(income.firstPayDay || 1)} &amp; {formatOrdinalDay(income.secondPayDay || 15)} (Next: {formatUtcDate(income.nextPayDate)})
+                            </span>
+                          ) : income.paySchedule === 'irregular' ? (
+                            <span>{income.nextPayDate ? `Received: ${formatUtcDate(income.nextPayDate)}` : 'Irregular'}</span>
+                          ) : (
+                            income.nextPayDate && (
+                              <span>Next pay: {formatUtcDate(income.nextPayDate)}</span>
+                            )
                           )}
                         </div>
                       </div>

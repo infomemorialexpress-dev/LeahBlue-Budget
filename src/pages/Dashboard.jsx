@@ -4,7 +4,12 @@ import AddExpense from '../components/AddExpense.jsx';
 import WeeklyCheckInModal from '../components/WeeklyCheckInModal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { deleteExpense, getDashboardSummary, getExpenses } from '../services/api.js';
-import { formatCurrency, formatOrdinalDay, formatUtcDate } from '../utils/formatters.js';
+import {
+  formatCurrency,
+  formatOrdinalDay,
+  formatPaydayWithWeekday,
+  formatUtcDate,
+} from '../utils/formatters.js';
 
 function formatMonthHeading(monthLabel) {
   if (!monthLabel) return 'This Month';
@@ -27,10 +32,15 @@ function Dashboard() {
 
   const [summary, setSummary] = useState({
     month: '',
+    incomeReceivedThisMonth: 0,
+    projectedMonthlyIncome: 0,
     currentMonthIncome: 0,
     currentMonthExpenses: 0,
     upcomingBillsTotal: 0,
+    billsToPrepareFor: 0,
     totalSavingsContributions: 0,
+    savingsThisMonth: 0,
+    availableUntilPayday: 0,
     remainingBudget: 0,
     expensesByCategory: [],
     nextPayDate: null,
@@ -113,11 +123,16 @@ function Dashboard() {
     }
   };
 
+  const safeToSpend =
+    summary.availableUntilPayday !== undefined
+      ? summary.availableUntilPayday
+      : summary.remainingBudget;
+
   const remainingClass =
-    summary.remainingBudget >= 0 ? 'metric-value is-positive' : 'metric-value is-negative';
+    safeToSpend >= 0 ? 'metric-value is-positive' : 'metric-value is-negative';
 
   const remainingMiniClass =
-    summary.remainingBudget >= 0 ? 'mini-stat-value is-positive' : 'mini-stat-value is-negative';
+    safeToSpend >= 0 ? 'mini-stat-value is-positive' : 'mini-stat-value is-negative';
 
   const maxCategoryTotal = summary.expensesByCategory.reduce(
     (max, item) => Math.max(max, Number(item.total || 0)),
@@ -155,42 +170,66 @@ function Dashboard() {
       {error && <div className="alert-error">{error}</div>}
 
       <div className="summary-grid" aria-label="Monthly budget summary">
+        {/* Card 1: Available until payday */}
+        <article className="metric-card is-highlight">
+          <div className="metric-card-header">
+            <span className="metric-label">Available until payday</span>
+          </div>
+          <strong className={loading ? 'metric-value' : remainingClass}>
+            {loading ? '—' : formatCurrency(safeToSpend)}
+          </strong>
+          <span className="metric-hint">After reserved bills and savings</span>
+        </article>
+
+        {/* Card 2: Next paycheck */}
         <article className="metric-card">
           <div className="metric-card-header">
-            <span className="metric-label">Income this month</span>
+            <span className="metric-label">Next paycheck</span>
             <Link
               to="/budget"
               state={{ action: 'edit-income' }}
               className="btn-card-action"
-              title="Edit paycheck amount, name, frequency, and next date in Budget Planner"
+              title="Edit paycheck schedule and dates in Budget Planner"
             >
               ✎ Edit Income
             </Link>
           </div>
-          <strong className="metric-value">
-            {loading ? '—' : formatCurrency(summary.currentMonthIncome)}
-          </strong>
-          <span className="metric-hint">Scheduled paychecks for this month</span>
-        </article>
-
-        <article className="metric-card">
-          <span className="metric-label">Expenses this month</span>
-          <strong className="metric-value">
-            {loading ? '—' : formatCurrency(summary.currentMonthExpenses)}
-          </strong>
-          <span className="metric-hint">Logged spending this month</span>
-        </article>
-
-        <article className="metric-card is-highlight">
-          <span className="metric-label">Remaining budget</span>
-          <strong className={loading ? 'metric-value' : remainingClass}>
-            {loading ? '—' : formatCurrency(summary.remainingBudget)}
+          <strong className="metric-value" style={{ fontSize: '1.35rem' }}>
+            {loading ? '—' : formatPaydayWithWeekday(summary.nextPayDate)}
           </strong>
           <span className="metric-hint">
-            {summary.remainingBudget >= 0
-              ? 'After expenses, upcoming bills & savings'
-              : 'Over monthly paycheck plan'}
+            {summary.incomeReceivedThisMonth > 0
+              ? `Received so far: ${formatCurrency(summary.incomeReceivedThisMonth)}`
+              : 'Upcoming scheduled payday'}
           </span>
+        </article>
+
+        {/* Card 3: Bills to prepare for */}
+        <article className="metric-card">
+          <div className="metric-card-header">
+            <span className="metric-label">Bills to prepare for</span>
+            <Link to="/bills" className="btn-card-action" title="View and manage bills">
+              View Bills
+            </Link>
+          </div>
+          <strong className="metric-value">
+            {loading ? '—' : formatCurrency(summary.billsToPrepareFor ?? summary.upcomingBillsTotal)}
+          </strong>
+          <span className="metric-hint">Due on or before next payday</span>
+        </article>
+
+        {/* Card 4: Savings this month */}
+        <article className="metric-card">
+          <div className="metric-card-header">
+            <span className="metric-label">Savings this month</span>
+            <Link to="/goals" className="btn-card-action" title="View savings goals">
+              View Goals
+            </Link>
+          </div>
+          <strong className="metric-value">
+            {loading ? '—' : formatCurrency(summary.savingsThisMonth ?? summary.totalSavingsContributions)}
+          </strong>
+          <span className="metric-hint">Allocated for savings goals</span>
         </article>
       </div>
 

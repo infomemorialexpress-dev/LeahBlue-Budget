@@ -37,3 +37,20 @@ export function formatUtcDate(dateValue) {
   });
 }
 
+export function formatPaydayWithWeekday(dateValue) {
+  if (!dateValue) return 'No scheduled date';
+  const parsed = new Date(dateValue);
+  if (Number.isNaN(parsed.getTime())) return 'No scheduled date';
+
+  const dateStr = parsed.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+  const weekday = parsed.toLocaleDateString('en-US', {
+    weekday: 'long',
+    timeZone: 'UTC',
+  });
+  return `${dateStr} • ${weekday}`;
+}
+
