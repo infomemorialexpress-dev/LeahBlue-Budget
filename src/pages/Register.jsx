@@ -1,17 +1,62 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { verifyActivationToken } from '../services/api.js';
 
 function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register } = useAuth();
 
-  const [email, setEmail] = useState('');
+  const tokenParam = searchParams.get('token') || '';
+  const emailParam = searchParams.get('email') || '';
+
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState('');
-  const [accessKey, setAccessKey] = useState('');
+  const [accessKey, setAccessKey] = useState(tokenParam);
+  const [isTokenVerified, setIsTokenVerified] = useState(false);
+  const [isVerifyingToken, setIsVerifyingToken] = useState(Boolean(tokenParam));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isAccessKeyError, setIsAccessKeyError] = useState(false);
+
+  useEffect(() => {
+    if (!tokenParam) {
+      setIsVerifyingToken(false);
+      return;
+    }
+
+    let isMounted = true;
+    async function verify() {
+      setIsVerifyingToken(true);
+      setError('');
+      try {
+        const result = await verifyActivationToken(tokenParam);
+        if (!isMounted) return;
+        if (result && result.valid) {
+          setIsTokenVerified(true);
+          setAccessKey(tokenParam);
+          if (result.email) {
+            setEmail(result.email);
+          } else if (emailParam) {
+            setEmail(emailParam);
+          }
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        setIsTokenVerified(false);
+        setIsAccessKeyError(true);
+        setError(err.message || 'This activation link is invalid or has already been used.');
+      } finally {
+        if (isMounted) setIsVerifyingToken(false);
+      }
+    }
+
+    verify();
+    return () => {
+      isMounted = false;
+    };
+  }, [tokenParam, emailParam]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -20,11 +65,11 @@ function Register() {
     setIsSubmitting(true);
 
     try {
-      await register(email, password, accessKey);
+      await register(email, password, accessKey, tokenParam);
       navigate('/onboarding');
     } catch (err) {
       setIsAccessKeyError(err.status === 403);
-      setError(err.message || 'Unable to register. Please verify your access key.');
+      setError(err.message || 'Unable to register. Please verify your activation link or access key.');
     } finally {
       setIsSubmitting(false);
     }
@@ -38,15 +83,29 @@ function Register() {
           <h1 className="card-title">Create your account</h1>
           <p className="card-headline">Every paycheck accounted for. Every dollar with a purpose.</p>
           <p className="card-subtitle">
-            Enter your Stan Store Access Key to unlock your budget planner.
+            {isTokenVerified
+              ? 'Your purchase is verified! Create a secure password to unlock your budget planner.'
+              : 'Enter your Stan Store Access Key to unlock your budget planner.'}
           </p>
         </header>
+
+        {isTokenVerified && (
+          <div className="badge-verified-purchase" style={{ marginBottom: '1.25rem' }}>
+            ✓ Purchase Verified — Create your password to get started
+          </div>
+        )}
+
+        {isVerifyingToken && (
+          <div className="empty-state" style={{ padding: '0.85rem', marginBottom: '1rem' }}>
+            Verifying your purchase activation link...
+          </div>
+        )}
 
         {error && (
           <div className="alert-error" style={{ marginBottom: '1rem' }}>
             <div>{error}</div>
             {isAccessKeyError && (
-              <a className="alert-link" href="#">
+              <a className="alert-link" href="#" style={{ display: 'inline-block', marginTop: '0.35rem' }}>
                 Purchase access on Stan Store
               </a>
             )}
@@ -65,6 +124,8 @@ function Register() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              readOnly={isTokenVerified}
+              style={isTokenVerified ? { backgroundColor: 'var(--surface-beige)', cursor: 'not-allowed' } : {}}
               required
             />
           </div>
@@ -85,22 +146,24 @@ function Register() {
             />
           </div>
 
-          <div className="field-group">
-            <label className="field-label" htmlFor="register-access-key">
-              Stan Store Access Key
-            </label>
-            <input
-              id="register-access-key"
-              className="field-input"
-              type="text"
-              placeholder="Enter your Stan Store Access Key"
-              value={accessKey}
-              onChange={(e) => setAccessKey(e.target.value)}
-              required
-            />
-          </div>
+          {!isTokenVerified && (
+            <div className="field-group">
+              <label className="field-label" htmlFor="register-access-key">
+                Stan Store Access Key
+              </label>
+              <input
+                id="register-access-key"
+                className="field-input"
+                type="text"
+                placeholder="Enter your Stan Store Access Key or activation token"
+                value={accessKey}
+                onChange={(e) => setAccessKey(e.target.value)}
+                required
+              />
+            </div>
+          )}
 
-          <button className="btn-primary" type="submit" disabled={isSubmitting}>
+          <button className="btn-primary" type="submit" disabled={isSubmitting || isVerifyingToken}>
             {isSubmitting ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>

@@ -1526,6 +1526,20 @@ a:hover {
   border-left: 3px solid var(--accent-blue);
 }
 
+.badge-verified-purchase {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--success-sage-text);
+  background-color: var(--success-sage-soft);
+  border: 1px solid var(--success-sage);
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
 .transaction-item.is-unreserved {
   opacity: 0.6;
 }

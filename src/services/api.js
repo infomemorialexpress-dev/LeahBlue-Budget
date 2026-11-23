@@ -69,6 +69,10 @@ export function register(payload) {
   });
 }
 
+export function verifyActivationToken(token) {
+  return apiRequest(`/auth/verify-token/${encodeURIComponent(token)}`);
+}
+
 export function forgotPassword(email) {
   return apiRequest('/auth/forgot-password', {
     method: 'POST',
