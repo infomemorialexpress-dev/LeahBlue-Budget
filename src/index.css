@@ -1343,3 +1343,64 @@ a:hover {
   border-left: 3px solid #b33939;
   background-color: #fffaf9;
 }
+
+.last-paid-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--success-sage-text);
+  background-color: var(--success-sage-soft);
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.bill-history-details {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.bill-history-summary {
+  cursor: pointer;
+  user-select: none;
+  color: var(--accent-blue-hover);
+  font-weight: 500;
+}
+
+.bill-history-summary:hover {
+  text-decoration: underline;
+}
+
+.bill-history-list {
+  list-style: none;
+  margin-top: 0.3rem;
+  padding: 0.35rem 0.6rem;
+  background-color: var(--bg-cream);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bill-history-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+}
+
+.btn-undo-subtle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  text-decoration: underline;
+}
+
+.btn-undo-subtle:hover {
+  color: var(--error-text);
+}

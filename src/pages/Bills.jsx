@@ -164,12 +164,29 @@ function Bills() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleTogglePaid = async (bill) => {
+  const handleTogglePaid = async (bill, forcePaid) => {
     setError('');
     setSuccessMessage('');
     setBusyBillId(bill._id);
+    const targetIsPaid = typeof forcePaid === 'boolean' ? forcePaid : !bill.isPaid;
     try {
-      await markBillPaid(bill._id, !bill.isPaid);
+      const response = await markBillPaid(bill._id, targetIsPaid);
+      if (response && response.rolledForward && response.nextDueDate) {
+        const nextDateFormatted = new Date(response.nextDueDate).toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+        setSuccessMessage(`✓ ${bill.name} paid, recorded in Expenses, and rolled forward to ${nextDateFormatted}.`);
+      } else if (response && response.message) {
+        setSuccessMessage(`✓ ${response.message}`);
+      } else {
+        setSuccessMessage(
+          targetIsPaid
+            ? `✓ ${bill.name} paid and recorded in Expenses.`
+            : `✓ ${bill.name} marked unpaid and expense removed.`,
+        );
+      }
       await loadBills();
     } catch (err) {
       handleAuthOrError(err, 'Could not update bill payment status.');
@@ -391,7 +408,41 @@ function Bills() {
                         ) : (
                           <span className="badge-unpaid">Unpaid</span>
                         )}
+                        {bill.lastPaidDate && (
+                          <span
+                            className="last-paid-badge"
+                            title={`Payment logged on ${new Date(bill.lastPaidDate).toLocaleString()}`}
+                          >
+                            Last paid: {new Date(bill.lastPaidDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </span>
+                        )}
                       </div>
+
+                      {bill.paymentHistory && bill.paymentHistory.length > 0 && (
+                        <details className="bill-history-details">
+                          <summary className="bill-history-summary">
+                            Payment History ({bill.paymentHistory.length})
+                          </summary>
+                          <ul className="bill-history-list">
+                            {bill.paymentHistory
+                              .slice()
+                              .reverse()
+                              .slice(0, 5)
+                              .map((p, idx) => (
+                                <li key={idx} className="bill-history-item">
+                                  <span>
+                                    {new Date(p.paidAt).toLocaleDateString(undefined, {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric',
+                                    })}
+                                  </span>
+                                  <span>{formatCurrency(p.amount)}</span>
+                                </li>
+                              ))}
+                          </ul>
+                        </details>
+                      )}
                     </div>
 
                     <div className="transaction-right" style={{ flexWrap: 'wrap' }}>
@@ -405,6 +456,17 @@ function Bills() {
                         >
                           {bill.isPaid ? 'Mark Unpaid' : 'Mark as Paid'}
                         </button>
+                        {bill.frequency !== 'one-time' && bill.lastPaidDate && (
+                          <button
+                            type="button"
+                            className="btn-undo-subtle"
+                            onClick={() => handleTogglePaid(bill, false)}
+                            disabled={isBusy}
+                            title="Undo the last payment and remove linked expense"
+                          >
+                            Undo
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="btn-secondary btn-compact"
